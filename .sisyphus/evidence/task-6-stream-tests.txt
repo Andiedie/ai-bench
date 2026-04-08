@@ -1,0 +1,9 @@
+
+ RUN  v4.1.3 /Users/andie/Downloads/personal/ai-test
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  11:42:25
+   Duration  463ms (transform 26ms, setup 33ms, import 22ms, tests 7ms, environment 314ms)
+

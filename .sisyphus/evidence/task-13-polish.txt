@@ -1,0 +1,8 @@
+Task 13 polish verification
+
+- Fixed App.tsx handleRun with try/finally so isRunning always resets if runBenchmark throws.
+- Fixed ConfigPanel number input handling so blank/invalid values do not write 0 into config state.
+- LSP diagnostics: clean on src/App.tsx and src/components/ConfigPanel.tsx.
+- Smell check: no TODO, FIXME, console.log, as any, or @ts-ignore found in src/.
+- Build: npm run build ✅
+- Tests: npx vitest run ✅ (8 files, 52 tests passed)
