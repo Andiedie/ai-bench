@@ -88,4 +88,5 @@ export const DEFAULT_CONFIG: BenchmarkConfig = {
   concurrency: 1,
   pricingModelId: '',
   cacheTtl: '',
+  cachePlacement: 'top',
 }

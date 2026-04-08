@@ -18,6 +18,8 @@ export interface BenchmarkConfig {
   pricingModelId: string
   /** Prompt cache TTL: '' = disabled, '5m' = 5 minutes, '1h' = 1 hour */
   cacheTtl: '' | '5m' | '1h'
+  /** Where to place cache_control: 'top' = request body top-level, 'block' = inside content block */
+  cachePlacement: 'top' | 'block'
 }
 
 /** Token usage breakdown for a single request */

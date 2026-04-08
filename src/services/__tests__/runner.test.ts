@@ -40,6 +40,7 @@ const testConfig: BenchmarkConfig = {
   concurrency: 2,
   pricingModelId: '',
   cacheTtl: '',
+  cachePlacement: 'top',
 }
 
 beforeEach(() => {

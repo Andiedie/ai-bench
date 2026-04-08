@@ -12,6 +12,7 @@ const testConfig: BenchmarkConfig = {
   concurrency: 1,
   pricingModelId: '',
   cacheTtl: '',
+  cachePlacement: 'top',
 }
 
 afterEach(() => {
@@ -129,17 +130,34 @@ describe('sendStreaming', () => {
     expect(result.tokens.cacheWriteTokens).toBe(0)
   })
 
-  test('includes cache_control when cacheTtl is set', async () => {
+  test('includes top-level cache_control when placement is top', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       body: createMockStream(fullSSESequence),
     })
     vi.stubGlobal('fetch', mockFetch)
 
-    await sendStreaming({ ...testConfig, cacheTtl: '1h' }, 's-1', 1)
+    await sendStreaming({ ...testConfig, cacheTtl: '1h', cachePlacement: 'top' }, 's-1', 1)
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body)
     expect(body.cache_control).toEqual({ type: 'ephemeral', ttl: '1h' })
+    expect(body.messages[0].content).toBe('Hello')
+  })
+
+  test('includes block-level cache_control when placement is block', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: createMockStream(fullSSESequence),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await sendStreaming({ ...testConfig, cacheTtl: '1h', cachePlacement: 'block' }, 's-1', 1)
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body).not.toHaveProperty('cache_control')
+    expect(body.messages[0].content).toEqual([
+      { type: 'text', text: 'Hello', cache_control: { type: 'ephemeral', ttl: '1h' } },
+    ])
   })
 
   test('omits cache_control when cacheTtl is empty', async () => {

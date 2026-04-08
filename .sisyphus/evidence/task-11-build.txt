@@ -1,13 +1,0 @@
-
-> tmp-scaffold@0.0.0 build
-> tsc -b && vite build
-
-vite v8.0.7 building client environment for production...
-[2Ktransforming...✓ 16 modules transformed.
-rendering chunks...
-computing gzip size...
-dist/index.html                   0.51 kB │ gzip:  0.33 kB
-dist/assets/index-BbQt9Wa8.css   23.67 kB │ gzip:  5.04 kB
-dist/assets/index-DI0I7W74.js   190.42 kB │ gzip: 59.96 kB
-
-✓ built in 124ms

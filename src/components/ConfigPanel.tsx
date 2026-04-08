@@ -344,6 +344,16 @@ export function ConfigPanel({
             <option value="5m">5 min</option>
             <option value="1h">1 hour (2x cost)</option>
           </select>
+          {config.cacheTtl && (
+            <select
+              value={config.cachePlacement}
+              onChange={(e) => onConfigChange({ ...config, cachePlacement: e.target.value as 'top' | 'block' })}
+              className="bg-gray-800 border border-gray-700 rounded-md px-2 py-1 text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            >
+              <option value="top">Top-level</option>
+              <option value="block">Content block</option>
+            </select>
+          )}
         </div>
 
         <button

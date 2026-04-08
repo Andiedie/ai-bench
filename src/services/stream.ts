@@ -57,8 +57,15 @@ export async function sendStreaming(
       },
       body: JSON.stringify({
         model: config.model,
-        ...(config.cacheTtl && { cache_control: { type: 'ephemeral', ttl: config.cacheTtl } }),
-        messages: [{ role: 'user', content: config.prompt }],
+        ...(config.cacheTtl && config.cachePlacement === 'top' && {
+          cache_control: { type: 'ephemeral', ttl: config.cacheTtl },
+        }),
+        messages: [{
+          role: 'user',
+          content: config.cacheTtl && config.cachePlacement === 'block'
+            ? [{ type: 'text', text: config.prompt, cache_control: { type: 'ephemeral', ttl: config.cacheTtl } }]
+            : config.prompt,
+        }],
         stream: true,
       }),
     })
