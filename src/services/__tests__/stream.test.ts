@@ -7,9 +7,11 @@ const testConfig: BenchmarkConfig = {
   apiKey: 'test-key',
   model: 'claude-sonnet-4-20250514',
   prompt: 'Hello',
-  maxTokens: 100,
-  iterations: 1,
+  nonStreamIterations: 1,
+  streamIterations: 1,
   concurrency: 1,
+  pricingModelId: '',
+  cacheTtl: '',
 }
 
 afterEach(() => {
@@ -125,5 +127,31 @@ describe('sendStreaming', () => {
     expect(result.tokens.outputTokens).toBe(5)
     expect(result.tokens.cacheReadTokens).toBe(0)
     expect(result.tokens.cacheWriteTokens).toBe(0)
+  })
+
+  test('includes cache_control when cacheTtl is set', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: createMockStream(fullSSESequence),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await sendStreaming({ ...testConfig, cacheTtl: '1h' }, 's-1', 1)
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.cache_control).toEqual({ type: 'ephemeral', ttl: '1h' })
+  })
+
+  test('omits cache_control when cacheTtl is empty', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: createMockStream(fullSSESequence),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await sendStreaming({ ...testConfig, cacheTtl: '' }, 's-1', 1)
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body).not.toHaveProperty('cache_control')
   })
 })

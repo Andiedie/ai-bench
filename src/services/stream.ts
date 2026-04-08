@@ -57,8 +57,8 @@ export async function sendStreaming(
       },
       body: JSON.stringify({
         model: config.model,
+        ...(config.cacheTtl && { cache_control: { type: 'ephemeral', ttl: config.cacheTtl } }),
         messages: [{ role: 'user', content: config.prompt }],
-        max_tokens: config.maxTokens,
         stream: true,
       }),
     })

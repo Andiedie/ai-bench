@@ -30,13 +30,12 @@ export async function runBenchmark(
   pricing: OpenRouterPricing | null,
   onResult: (result: BenchmarkResult) => void,
 ): Promise<BenchmarkResult[]> {
-  const allResults: BenchmarkResult[] = []
+  const allTasks: (() => Promise<BenchmarkResult>)[] = []
 
-  const nsTasks: (() => Promise<BenchmarkResult>)[] = []
-  for (let i = 1; i <= config.iterations; i++) {
+  for (let i = 1; i <= config.nonStreamIterations; i++) {
     const id = `ns-${i}`
     const iteration = i
-    nsTasks.push(async () => {
+    allTasks.push(async () => {
       try {
         const result = await sendNonStreaming(config, id, iteration)
         result.costUsd = calculateCost(result.tokens, pricing)
@@ -59,14 +58,11 @@ export async function runBenchmark(
       }
     })
   }
-  const nsResults = await promisePool(nsTasks, config.concurrency)
-  allResults.push(...nsResults)
 
-  const sTasks: (() => Promise<BenchmarkResult>)[] = []
-  for (let i = 1; i <= config.iterations; i++) {
+  for (let i = 1; i <= config.streamIterations; i++) {
     const id = `s-${i}`
     const iteration = i
-    sTasks.push(async () => {
+    allTasks.push(async () => {
       try {
         const result = await sendStreaming(config, id, iteration)
         result.costUsd = calculateCost(result.tokens, pricing)
@@ -89,8 +85,6 @@ export async function runBenchmark(
       }
     })
   }
-  const sResults = await promisePool(sTasks, config.concurrency)
-  allResults.push(...sResults)
 
-  return allResults
+  return promisePool(allTasks, config.concurrency)
 }

@@ -8,12 +8,16 @@ export interface BenchmarkConfig {
   model: string
   /** Prompt text to send to the API */
   prompt: string
-  /** Maximum tokens to generate */
-  maxTokens: number
-  /** Number of iterations for each mode (stream + non-stream) */
-  iterations: number
-  /** Number of concurrent requests within each mode */
+  /** Number of non-streaming iterations */
+  nonStreamIterations: number
+  /** Number of streaming iterations */
+  streamIterations: number
+  /** Number of concurrent requests */
   concurrency: number
+  /** OpenRouter model ID used for pricing lookup (empty string = auto-match by model name) */
+  pricingModelId: string
+  /** Prompt cache TTL: '' = disabled, '5m' = 5 minutes, '1h' = 1 hour */
+  cacheTtl: '' | '5m' | '1h'
 }
 
 /** Token usage breakdown for a single request */

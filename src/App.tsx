@@ -26,10 +26,12 @@ function App() {
   async function handleRun() {
     setIsRunning(true)
     setResults([])
-    const total = config.iterations * 2
+    const total = config.nonStreamIterations + config.streamIterations
     setProgress({ current: 0, total })
 
-    const pricing = findModelPricing(models, config.model)
+    const pricing = config.pricingModelId
+      ? findModelPricing(models, config.pricingModelId)
+      : findModelPricing(models, config.model)
 
     try {
       await runBenchmark(config, pricing, (result) => {

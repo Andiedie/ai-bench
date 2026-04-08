@@ -35,9 +35,11 @@ const testConfig: BenchmarkConfig = {
   apiKey: 'test-key',
   model: 'claude-sonnet-4-20250514',
   prompt: 'Hello',
-  maxTokens: 256,
-  iterations: 3,
+  nonStreamIterations: 3,
+  streamIterations: 3,
   concurrency: 2,
+  pricingModelId: '',
+  cacheTtl: '',
 }
 
 beforeEach(() => {
@@ -57,21 +59,6 @@ describe('runBenchmark', () => {
     expect(results).toHaveLength(6)
     expect(results.filter(r => r.mode === 'non-stream')).toHaveLength(3)
     expect(results.filter(r => r.mode === 'stream')).toHaveLength(3)
-  })
-
-  test('order: non-streaming results come before streaming results', async () => {
-    vi.mocked(sendNonStreaming).mockImplementation(async (_config, id, iteration) =>
-      makeMockResult({ id, mode: 'non-stream', iteration }),
-    )
-    vi.mocked(sendStreaming).mockImplementation(async (_config, id, iteration) =>
-      makeMockResult({ id, mode: 'stream', iteration, ttftMs: 50 }),
-    )
-
-    const results = await runBenchmark(testConfig, null, () => {})
-    const firstStreamIndex = results.findIndex(r => r.mode === 'stream')
-    const lastNonStreamIndex = results.length - 1 - [...results].reverse().findIndex(r => r.mode === 'non-stream')
-
-    expect(lastNonStreamIndex).toBeLessThan(firstStreamIndex)
   })
 
   test('onResult callback is called once per result', async () => {
@@ -135,7 +122,7 @@ describe('runBenchmark', () => {
       return makeMockResult({ id, mode: 'stream', iteration, ttftMs: 50 })
     })
 
-    const config = { ...testConfig, iterations: 4, concurrency: 2 }
+    const config = { ...testConfig, nonStreamIterations: 4, streamIterations: 4, concurrency: 2 }
     await runBenchmark(config, null, () => {})
 
     expect(maxConcurrent).toBeLessThanOrEqual(2)

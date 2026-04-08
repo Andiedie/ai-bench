@@ -7,9 +7,11 @@ const testConfig: BenchmarkConfig = {
   apiKey: 'test-api-key',
   model: 'claude-sonnet-4-20250514',
   prompt: 'Hello',
-  maxTokens: 256,
-  iterations: 1,
+  nonStreamIterations: 1,
+  streamIterations: 1,
   concurrency: 1,
+  pricingModelId: '',
+  cacheTtl: '',
 }
 
 afterEach(() => {
@@ -105,5 +107,37 @@ describe('sendNonStreaming', () => {
 
     const result = await sendNonStreaming(testConfig, 'ns-1', 1)
     expect(result.error).toBe('Network down')
+  })
+
+  test('includes cache_control when cacheTtl is set', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        content: [{ type: 'text', text: 'Hi' }],
+        usage: { input_tokens: 5, output_tokens: 3, cache_creation_input_tokens: null, cache_read_input_tokens: null },
+      }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await sendNonStreaming({ ...testConfig, cacheTtl: '5m' }, 'ns-1', 1)
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.cache_control).toEqual({ type: 'ephemeral', ttl: '5m' })
+  })
+
+  test('omits cache_control when cacheTtl is empty', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        content: [{ type: 'text', text: 'Hi' }],
+        usage: { input_tokens: 5, output_tokens: 3, cache_creation_input_tokens: null, cache_read_input_tokens: null },
+      }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await sendNonStreaming({ ...testConfig, cacheTtl: '' }, 'ns-1', 1)
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body).not.toHaveProperty('cache_control')
   })
 })
